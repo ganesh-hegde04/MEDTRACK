@@ -20,4 +20,15 @@ public class EmailService {
 
         mailSender.send(message);
     }
+    public void sendAppointmentCancellation(String to, String doctorName, String hospitalName, String appointmentDateTime, String reason) {
+    String subject = "Appointment Cancelled: Dr. " + doctorName + " (" + hospitalName + ")";
+    String body = "Dear Patient,\n\nWe regret to inform you that your appointment with Dr. "
+            + doctorName + " at " + hospitalName + " scheduled on " + appointmentDateTime + " has been cancelled.\n\n"
+            + "Reason: " + reason
+            + "\n\nWe apologize for the inconvenience caused.\n\nSincerely,\nSmart Portal Team";
+    
+    sendAppointmentReminder(to, subject, body);
+}
+
+    
 }

@@ -20,32 +20,54 @@ public class AppointmentReminderJob {
     private final AppointmentRepository appointmentRepository;
     private final EmailService emailService;
 
-    // Runs every 2 minutes
-    @Scheduled(fixedRate = 120000)
+    // Runs every 1 minute
+    @Scheduled(fixedRate = 60000)
     public void sendReminders() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-        LocalTime startTime = now.toLocalTime();
-        LocalTime endTime = startTime.plusHours(1);
+        LocalDateTime windowStart = now.plusHours(3).minusMinutes(10);
+        LocalDateTime windowEnd = now.plusHours(3).plusMinutes(10);
 
-        List<Appointment> upcomingAppointments = appointmentRepository
-                .findAppointmentsOnDateBetweenTimes(today, startTime, endTime);
+        LocalDate today = windowStart.toLocalDate();
+        LocalDate tomorrow = windowEnd.toLocalDate();
 
-        System.out.printf("[ReminderJob] Found %d upcoming appointments between %s and %s on %s%n",
-                upcomingAppointments.size(), startTime, endTime, today);
+        LocalTime startToday = windowStart.toLocalTime();
+        LocalTime endToday = (today.equals(tomorrow)) ? windowEnd.toLocalTime() : LocalTime.MAX;
+        LocalTime startTomorrow = (today.equals(tomorrow)) ? LocalTime.MIN : LocalTime.MIN;
+        LocalTime endTomorrow = windowEnd.toLocalTime();
+
+        List<Appointment> upcomingAppointments = appointmentRepository.findAppointmentsForReminder(
+                today, startToday, endToday,
+                tomorrow, startTomorrow, endTomorrow
+        );
+
+        System.out.printf("[ReminderJob] Found %d appointments on %s between %s and %s%n",
+                upcomingAppointments.size(), today, startToday, endToday);
+        if (!today.equals(tomorrow)) {
+            System.out.printf("[ReminderJob] Also checking %s between %s and %s%n",
+                    tomorrow, startTomorrow, endTomorrow);
+        }
 
         for (Appointment appt : upcomingAppointments) {
             User user = appt.getUser();
             String email = user.getEmail();
 
-            if (email != null && !email.isEmpty()) {
+            if (email != null && !email.isEmpty() && !appt.isReminderSent()) {
                 String subject = "Appointment Reminder";
-                String body = String.format("Hi %s,\n\nThis is a reminder that you have an appointment scheduled at %s on %s.\n\nThanks,\nSmart Portal Team",
+                String body = String.format(
+                        "Hi %s,\n\nThis is a reminder that you have an appointment scheduled at %s on %s.\n" +
+                        "Appointment ID: %s\nDoctor: %s\nHospital: %s\n\nThanks,\nSmart Portal Team",
                         user.getName(),
                         appt.getAppointmentTime(),
-                        appt.getAppointmentDate());
+                        appt.getAppointmentDate(),
+                        appt.getAppointmentId(),
+                        appt.getDoctor() != null ? appt.getDoctor().getName() : "N/A",
+                        appt.getHospital() != null ? appt.getHospital().getName() : "N/A"
+                );
 
                 emailService.sendAppointmentReminder(email, subject, body);
+
+                appt.setReminderSent(true); // Prevent duplicate emails
+                appointmentRepository.save(appt);
 
                 System.out.printf("[ReminderJob] Sent reminder to %s for appointment at %s on %s%n",
                         email, appt.getAppointmentTime(), appt.getAppointmentDate());

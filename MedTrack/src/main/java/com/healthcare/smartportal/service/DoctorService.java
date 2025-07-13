@@ -25,7 +25,7 @@ public class DoctorService {
 
         Doctor doctor = new Doctor();
         doctor.setName(request.getName());
-        doctor.setSpecialization(request.getSpecialization());
+        doctor.setdepartment(request.getdepartment());
         doctor.setExperience(request.getExperience());
         doctor.setHospital(hospital);
 

@@ -12,11 +12,11 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     // Find doctor by name (exact match)
     Optional<Doctor> findByName(String name);
 
-    // Find all doctors with a given specialization
-    List<Doctor> findBySpecialization(String specialization);
+    // Find all doctors with a given department
+    List<Doctor> findBydepartment(String department);
 
-    // Find doctor by name and specialization
-    Optional<Doctor> findByNameAndSpecialization(String name, String specialization);
+    // Find doctor by name and department
+    Optional<Doctor> findByNameAndDepartment(String name, String department);
 
     // Find all doctors in a specific hospital by hospital ID
     List<Doctor> findByHospitalId(UUID hospitalId);

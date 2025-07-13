@@ -16,7 +16,7 @@ public class Doctor {
     private String name;
 
     @Column(nullable = false)
-    private String specialization;
+    private String department;
 
     @Column(nullable = false)
     private int experience;  
@@ -32,8 +32,8 @@ public class Doctor {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getSpecialization() { return specialization; }
-    public void setSpecialization(String specialization) { this.specialization = specialization; }
+    public String getdepartment() { return department; }
+    public void setdepartment(String department) { this.department = department; }
 
     public int getExperience() { return experience; }
     public void setExperience(int experience) { this.experience = experience; }
