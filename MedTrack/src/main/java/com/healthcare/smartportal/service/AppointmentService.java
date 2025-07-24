@@ -5,6 +5,7 @@ import com.healthcare.smartportal.exception.SlotAlreadyBookedException;
 import com.healthcare.smartportal.model.*;
 import com.healthcare.smartportal.repository.AppointmentRepository;
 import com.healthcare.smartportal.repository.DoctorRepository;
+import com.healthcare.smartportal.repository.HospitalRepository;
 import com.healthcare.smartportal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +22,25 @@ public class AppointmentService {
     private final DoctorRepository doctorRepo;
     private final UserRepository userRepo;
     private final EmailService emailService;
+    private final HospitalRepository hospitalRepo;
 
-    public Appointment bookAppointment(String phone, UUID doctorId, LocalDate date, LocalTime time) {
+    // ✅ Book Appointment: hospital → department → doctor
+    public Appointment bookAppointment(
+            String phone,
+            String hospitalName,
+            String department,
+            String doctorName,
+            LocalDate date,
+            LocalTime time) {
+
         User user = userRepo.findByPhone(phone)
                 .orElseThrow(() -> new RuntimeException("User not found with phone: " + phone));
-        Doctor doctor = doctorRepo.findById(doctorId)
-                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
+        Hospital hospital = hospitalRepo.findByNameIgnoreCase(hospitalName)
+                .orElseThrow(() -> new RuntimeException("Hospital not found: " + hospitalName));
+
+        Doctor doctor = doctorRepo.findByNameAndDepartmentAndHospital(doctorName, department, hospital)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found: " + doctorName + " in " + department + " at " + hospitalName));
 
         if (appointmentRepo.existsByDoctorAndAppointmentDateAndAppointmentTime(doctor, date, time)) {
             throw new SlotAlreadyBookedException("Slot already booked.");
@@ -36,12 +49,12 @@ public class AppointmentService {
         Appointment appointment = new Appointment();
         appointment.setUser(user);
         appointment.setDoctor(doctor);
-        appointment.setHospital(doctor.getHospital());
+        appointment.setHospital(hospital);
         appointment.setAppointmentDate(date);
         appointment.setAppointmentTime(time);
-        appointment.setStatus(AppointmentStatus.CONFIRMED); // ✅ Enum used here
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointment.setReminderSent(false);
-        appointment.setAppointmentId(generateCustomAppointmentId(doctor.getHospital(), user, date, time));
+        appointment.setAppointmentId(generateCustomAppointmentId(hospital, user, date, time));
 
         Appointment saved = appointmentRepo.save(appointment);
         sendConfirmationEmail(saved, "Appointment Confirmed");
@@ -49,6 +62,7 @@ public class AppointmentService {
         return saved;
     }
 
+    // ✅ Reschedule
     public Appointment rescheduleAppointment(String appointmentId, LocalDate newDate, LocalTime newTime) {
         Appointment appointment = appointmentRepo.findByAppointmentId(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -60,7 +74,7 @@ public class AppointmentService {
 
         appointment.setAppointmentDate(newDate);
         appointment.setAppointmentTime(newTime);
-        appointment.setStatus(AppointmentStatus.RESCHEDULED); // ✅ Enum used here
+        appointment.setStatus(AppointmentStatus.RESCHEDULED);
         appointment.setReminderSent(false);
         appointment.setAppointmentId(generateCustomAppointmentId(
                 appointment.getHospital(), appointment.getUser(), newDate, newTime));
@@ -71,11 +85,12 @@ public class AppointmentService {
         return saved;
     }
 
+    // ✅ Cancel
     public void cancelAppointment(String appointmentId) {
         Appointment appointment = appointmentRepo.findByAppointmentId(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        appointment.setStatus(AppointmentStatus.CANCELLED); // ✅ Enum used here
+        appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepo.save(appointment);
 
         if (appointment.getUser().getEmail() != null) {
@@ -90,6 +105,7 @@ public class AppointmentService {
         }
     }
 
+    // ✅ Cancel by Hospital
     public void cancelByHospitalWithNotification(String appointmentId, String reason) {
         Appointment appointment = appointmentRepo.findByAppointmentId(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -98,7 +114,7 @@ public class AppointmentService {
             throw new RuntimeException("Appointment is already cancelled");
         }
 
-        appointment.setStatus(AppointmentStatus.CANCELLED); // ✅ Enum used here
+        appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepo.save(appointment);
 
         String patientEmail = appointment.getUser().getEmail();
@@ -111,6 +127,7 @@ public class AppointmentService {
         }
     }
 
+    // ✅ Custom Appointment ID Generator
     private String generateCustomAppointmentId(Hospital hospital, User user, LocalDate date, LocalTime time) {
         String hospitalName = hospital != null ? hospital.getName().replaceAll("\\s+", "") : "Hospital";
 
@@ -129,6 +146,7 @@ public class AppointmentService {
         return hospitalName + "_" + username + "_" + dateStr + "_" + timeStr;
     }
 
+    // ✅ Confirmation Email
     private void sendConfirmationEmail(Appointment appointment, String subject) {
         User user = appointment.getUser();
         String email = user.getEmail();
@@ -136,7 +154,7 @@ public class AppointmentService {
             String body = String.format(
                     "Hi %s,\n\nYour appointment has been %s.\n\nDate: %s\nTime: %s\nDoctor: %s\nHospital: %s\nAppointment ID: %s\n\nThanks,\nSmart Portal Team",
                     user.getName(),
-                    appointment.getStatus().name().toLowerCase(), // ✅ Enum converted to lowercase string
+                    appointment.getStatus().name().toLowerCase(),
                     appointment.getAppointmentDate(),
                     appointment.getAppointmentTime(),
                     appointment.getDoctor().getName(),

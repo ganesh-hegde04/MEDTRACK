@@ -19,7 +19,10 @@ public class Doctor {
     private String department;
 
     @Column(nullable = false)
-    private int experience;  
+    private int experience;
+
+    @Column(nullable = false)
+    private String specialization; 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "hospital_id", nullable = false)
@@ -32,11 +35,14 @@ public class Doctor {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getdepartment() { return department; }
-    public void setdepartment(String department) { this.department = department; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
 
     public int getExperience() { return experience; }
     public void setExperience(int experience) { this.experience = experience; }
+
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
 
     public Hospital getHospital() { return hospital; }
     public void setHospital(Hospital hospital) { this.hospital = hospital; }

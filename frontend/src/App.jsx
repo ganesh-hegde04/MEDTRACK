@@ -9,6 +9,8 @@ import HospitalList from "./pages/HospitalList";
 import BloodGroupSelector from "./pages/BloodGroupSelector";
 
 // Admin related pages
+import BookAppointment from "./pages/BookAppointment";
+
 import AdminRegister from "./pages/AdminRegister";
 import AdminLogin from "./pages/AdminLogin";
 import AuthPage from "./pages/AuthPage"; // General Admin auth page
@@ -42,6 +44,9 @@ export default function App() {
 
       {/* Admin Dashboard */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+      {/* BOOK APPOINTMENT */}
+      <Route path="/appointment" element={<BookAppointment />} />
     </Routes>
   );
 }

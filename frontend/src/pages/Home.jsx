@@ -55,7 +55,23 @@ export default function Home() {
       icon: <MdOutlineBloodtype className="text-3xl" />,
       color: "from-red-500 to-pink-600",
       darkColor: "from-red-600 to-pink-700"
-    }
+    },
+    {
+    id: "appointment",
+    title: "Book Appointment",
+    description: "Schedule consultations with healthcare providers",
+    icon: <FaUserCircle className="text-3xl" />,
+    color: "from-green-500 to-emerald-600",
+    darkColor: "from-green-600 to-emerald-700"
+  },
+  {
+    id: "records",
+    title: "Medical Records",
+    description: "Access and manage your health history securely",
+    icon: <FaEnvelope className="text-3xl" />,
+    color: "from-yellow-500 to-orange-500",
+    darkColor: "from-yellow-600 to-orange-600"
+  }
   ];
 
   const reviews = [
