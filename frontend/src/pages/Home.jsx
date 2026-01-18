@@ -37,31 +37,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* =======================
-     🔹 KEEP BACKEND ALIVE 🔹
-     ======================= */
-  useEffect(() => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-    const pingBackend = async () => {
-      try {
-        await fetch(`${BACKEND_URL}/api/keep-alive`, {
-          method: "GET",
-        });
-      } catch (err) {
-        // silently fail (do not spam console)
-      }
-    };
-
-    // call once immediately when page loads
-    pingBackend();
-
-    // then every 14 minutes
-    const intervalId = setInterval(pingBackend, 14 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-  /* ======================= */
+  
 
   const features = [
     {
