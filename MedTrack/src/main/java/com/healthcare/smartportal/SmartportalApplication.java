@@ -1,30 +1,24 @@
 package com.healthcare.smartportal;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.io.PrintStream;
 
 @SpringBootApplication
 @EnableScheduling
 public class SmartportalApplication {
 
-    static {
-        
-        Dotenv dotenv = Dotenv.configure()
-                .ignoreIfMissing()
-                .load();
+    public static void main(String[] args) {
 
-        dotenv.entries().forEach(entry -> {
-          
-            if (System.getProperty(entry.getKey()) == null
-                    && System.getenv(entry.getKey()) == null) {
-                System.setProperty(entry.getKey(), entry.getValue());
+        System.setOut(new PrintStream(System.out) {
+            @Override
+            public void println(String x) {
+                
             }
         });
-    }
 
-    public static void main(String[] args) {
         SpringApplication.run(SmartportalApplication.class, args);
     }
 }

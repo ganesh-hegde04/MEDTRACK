@@ -25,7 +25,7 @@ public class DoctorService {
 
         Doctor doctor = new Doctor();
         doctor.setName(request.getName());
-        doctor.setDepartment(request.getDepartment()); // ✅ fixed method name
+        doctor.setDepartment(request.getDepartment()); 
         doctor.setExperience(request.getExperience());
         doctor.setSpecialization(request.getSpecialization());
         doctor.setHospital(hospital);

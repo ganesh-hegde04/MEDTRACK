@@ -5,6 +5,8 @@ import com.healthcare.smartportal.model.User;
 import com.healthcare.smartportal.repository.AppointmentRepository;
 import com.healthcare.smartportal.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AppointmentReminderJob {
@@ -40,10 +42,10 @@ public class AppointmentReminderJob {
                 tomorrow, startTomorrow, endTomorrow
         );
 
-        System.out.printf("[ReminderJob] Found %d appointments on %s between %s and %s%n",
+        log.debug("[ReminderJob] Found %d appointments on %s between %s and %s%n",
                 upcomingAppointments.size(), today, startToday, endToday);
         if (!today.equals(tomorrow)) {
-            System.out.printf("[ReminderJob] Also checking %s between %s and %s%n",
+            log.debug("[ReminderJob] Also checking %s between %s and %s%n",
                     tomorrow, startTomorrow, endTomorrow);
         }
 
@@ -69,7 +71,7 @@ public class AppointmentReminderJob {
                 appt.setReminderSent(true); // Prevent duplicate emails
                 appointmentRepository.save(appt);
 
-                System.out.printf("[ReminderJob] Sent reminder to %s for appointment at %s on %s%n",
+                log.debug("[ReminderJob] Sent reminder to %s for appointment at %s on %s%n",
                         email, appt.getAppointmentTime(), appt.getAppointmentDate());
             }
         }

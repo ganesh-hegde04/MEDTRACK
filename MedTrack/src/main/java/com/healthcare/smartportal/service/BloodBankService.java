@@ -4,11 +4,14 @@ import com.healthcare.smartportal.model.BloodInventory;
 import com.healthcare.smartportal.model.Hospital;
 import com.healthcare.smartportal.repository.BloodInventoryRepository;
 import com.healthcare.smartportal.util.GeoUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
+@Slf4j
 @Service
 public class BloodBankService {
 
@@ -44,27 +47,27 @@ public class BloodBankService {
 
         // Search progressively in increasing radius steps up to 50 km
         for (double radius : searchRadii) {
-            System.out.println("Searching hospitals within radius: " + radius + " km");
+            log.debug("Searching hospitals within radius: " + radius + " km");
             for (BloodInventory inventory : inventoryList) {
                 if (inventory.getQuantity() > 0) {
                     Hospital h = inventory.getHospital();
                     double distance = GeoUtils.distance(userLat, userLon, h.getLatitude(), h.getLongitude());
-                    System.out.println("Checking hospital: " + h.getName() + ", Distance: " + distance + " km");
+                    log.debug("Checking hospital: " + h.getName() + ", Distance: " + distance + " km");
 
                     if (distance <= radius && !results.contains(h)) {
                         results.add(h);
-                        System.out.println("Added hospital: " + h.getName() + " at distance: " + distance + " km");
+                        log.debug("Added hospital: " + h.getName() + " at distance: " + distance + " km");
                     }
                 }
             }
             if (!results.isEmpty()) {
-                System.out.println("Found hospitals at radius: " + radius + " km");
+                log.debug("Found hospitals at radius: " + radius + " km");
                 return results;  // return immediately once found any
             }
         }
 
         // If no hospital found within 50 km, search up to 100 km and sort by nearest
-        System.out.println("No hospitals found within 50 km. Searching within 100 km sorted by nearest.");
+        log.debug("No hospitals found within 50 km. Searching within 100 km sorted by nearest.");
 
         List<HospitalDistance> hospitalDistances = new ArrayList<>();
 
@@ -79,7 +82,7 @@ public class BloodBankService {
         }
 
         if (hospitalDistances.isEmpty()) {
-            System.out.println("No hospital having " + bloodGroup + " blood group found within 100 km radius.");
+            log.debug("No hospital having " + bloodGroup + " blood group found within 100 km radius.");
             return results; // empty list
         }
 
@@ -89,7 +92,7 @@ public class BloodBankService {
         List<Hospital> sortedHospitals = new ArrayList<>();
         for (HospitalDistance hd : hospitalDistances) {
             sortedHospitals.add(hd.hospital);
-            System.out.println("Hospital within 100 km: " + hd.hospital.getName() + " at distance: " + hd.distance + " km");
+            log.debug("Hospital within 100 km: " + hd.hospital.getName() + " at distance: " + hd.distance + " km");
         }
 
         return sortedHospitals;

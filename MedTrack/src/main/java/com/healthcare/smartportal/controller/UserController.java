@@ -12,6 +12,8 @@ import com.healthcare.smartportal.service.UserService;
 import com.healthcare.smartportal.service.VerificationService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -24,6 +26,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -64,7 +67,7 @@ public class UserController {
 public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
     
     
-    System.out.println("🔍 DEBUG: Trying login for username='" + loginRequest.getUsername() + "'");
+    log.debug("🔍 DEBUG: Trying login for username='" + loginRequest.getUsername() + "'");
     
     Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
 
@@ -72,14 +75,14 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userOpt.get();
         
         
-        System.out.println(" User found: " + user.getUsername());
-        System.out.println(" Stored password hash: " + user.getPassword());
-        System.out.println("Hash starts with $2a$? " + (user.getPassword() != null && user.getPassword().startsWith("$2a$")));
+        log.debug(" User found: " + user.getUsername());
+        log.debug(" Stored password hash: " + user.getPassword());
+        log.debug("Hash starts with $2a$? " + (user.getPassword() != null && user.getPassword().startsWith("$2a$")));
         
         // DIRECT BCrypt DEBUGGING
         try {
             boolean passwordMatches = BCrypt.checkpw(loginRequest.getPassword(), user.getPassword());
-            System.out.println(" BCrypt.checkpw result: " + passwordMatches);
+            log.debug(" BCrypt.checkpw result: " + passwordMatches);
             
             if (passwordMatches) {
                 String token = tokenService.generateToken(user.getPhone(), user.getEmail());
@@ -89,18 +92,18 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
                 response.put("phone", user.getPhone());
                 response.put("email", user.getEmail());
 
-                System.out.println("✅ Login SUCCESS for: " + user.getUsername());
+               // log.debug("✅ Login SUCCESS for: " + user.getUsername());
                 return ResponseEntity.ok(response);
             } else {
-                System.out.println("❌ Password mismatch for user: " + user.getUsername());
-                System.out.println("   Input password: " + loginRequest.getPassword());
+                log.debug("❌ Password mismatch for user: " + user.getUsername());
+                log.debug("   Input password: " + loginRequest.getPassword());
             }
         } catch (Exception e) {
-            System.out.println("❌ BCrypt ERROR: " + e.getMessage());
-            System.out.println("   This means password is NOT BCrypt encoded!");
+            log.debug("❌ BCrypt ERROR: " + e.getMessage());
+            log.debug("   This means password is NOT BCrypt encoded!");
         }
     } else {
-        System.out.println("❌ User NOT FOUND with username: " + loginRequest.getUsername());
+        log.debug("❌ User NOT FOUND with username: " + loginRequest.getUsername());
     }
 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -121,8 +124,8 @@ public ResponseEntity<?> getUserAppointments(
     try {
         phoneFromToken = tokenService.extractPhoneFromToken(token);
 
-        System.out.println("Phone in URL: " + phone);
-        System.out.println("Phone in Token: " + phoneFromToken);
+        log.debug("Phone in URL: " + phone);
+        log.debug("Phone in Token: " + phoneFromToken);
     } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
     }

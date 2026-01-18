@@ -77,7 +77,7 @@ public class TokenService {
 
     @PostConstruct
 public void test() {
-    System.out.println("JWT secret length = " + jwtSecret.length());
+    //ystem.out.println("JWT secret length = " + jwtSecret.length());
 }
 
 }

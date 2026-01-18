@@ -178,7 +178,7 @@ public class AppointmentService {
     
     // Filter out CANCELLED appointments and only get upcoming ones
     List<AppointmentResponse> responses = allAppointments.stream()
-            .filter(app -> app.getStatus() != AppointmentStatus.CANCELLED) // Add this filter
+            .filter(app -> app.getStatus() != AppointmentStatus.CANCELLED) 
             .filter(app -> {
                 // Check if appointment is upcoming (date/time in future)
                 LocalDateTime appointmentDateTime = LocalDateTime.of(

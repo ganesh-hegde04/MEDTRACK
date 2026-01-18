@@ -5,6 +5,7 @@ import com.healthcare.smartportal.repository.MedicalReportRepository;
 import com.healthcare.smartportal.service.EncryptionService;
 import com.healthcare.smartportal.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor
@@ -86,11 +88,11 @@ public class MedicalReportController {
         try {
             String email = extractEmailFromAuthHeader(authHeader);
 
-            System.out.println("Fetching reports for email: " + email);
+            log.debug("Fetching reports for email: " + email);
 
             List<MedicalReport> reports = reportRepository.findReports(email);
 
-            System.out.println("Reports found: " + reports.size());
+            log.debug("Reports found: " + reports.size());
 
             List<Map<String, Object>> response = reports.stream().map(report -> {
                 Map<String, Object> map = new HashMap<>();

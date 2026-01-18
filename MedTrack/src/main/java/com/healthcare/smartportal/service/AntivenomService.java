@@ -15,6 +15,8 @@ import com.healthcare.smartportal.repository.AnimalRepository;
 import com.healthcare.smartportal.repository.AntivenomInventoryRepository;
 import com.healthcare.smartportal.util.GeoUtils;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
 public class AntivenomService {
 
@@ -46,29 +48,29 @@ public class AntivenomService {
 
         // Collect hospitals cumulatively for all radius steps (5 to 50 km)
         for (double radius : radiusSteps) {
-            System.out.println("Searching hospitals within radius: " + radius + " km");
+            log.debug("Searching hospitals within radius: " + radius + " km");
 
             for (AntivenomInventory inventory : inventoryList) {
                 Hospital hospital = inventory.getHospital();
                 double distance = GeoUtils.distance(userLat, userLon, hospital.getLatitude(), hospital.getLongitude());
 
-                System.out.println("Checking hospital: " + hospital.getName() + ", Distance: " + distance + " km");
+                log.debug("Checking hospital: " + hospital.getName() + ", Distance: " + distance + " km");
 
                 if (distance <= radius && !nearbyHospitals.contains(hospital)) {
                     nearbyHospitals.add(hospital);
-                    System.out.println("Added hospital: " + hospital.getName() + " at distance: " + distance + " km");
+                    log.debug("Added hospital: " + hospital.getName() + " at distance: " + distance + " km");
                 }
             }
         }
 
         // Return all hospitals within 50 km if any found
         if (!nearbyHospitals.isEmpty()) {
-            System.out.println("Hospitals found within 50 km.");
+            log.debug("Hospitals found within 50 km.");
             return nearbyHospitals;
         }
 
         // Else check within 100 km and sort by nearest
-        System.out.println("No hospitals found within 50 km. Searching within 100 km and sorting by nearest.");
+        log.debug("No hospitals found within 50 km. Searching within 100 km and sorting by nearest.");
 
         List<HospitalDistance> hospitalDistances = new ArrayList<>();
 
@@ -81,7 +83,7 @@ public class AntivenomService {
         }
 
         if (hospitalDistances.isEmpty()) {
-            System.out.println("No hospitals with antivenom for '" + animalName + "' found within 100 km radius.");
+            log.debug("No hospitals with antivenom for '" + animalName + "' found within 100 km radius.");
             return nearbyHospitals; // empty list
         }
 
@@ -92,7 +94,7 @@ public class AntivenomService {
         List<Hospital> sortedHospitals = new ArrayList<>();
         for (HospitalDistance hd : hospitalDistances) {
             sortedHospitals.add(hd.hospital);
-            System.out.println("Hospital within 100 km: " + hd.hospital.getName() + " at distance: " + hd.distance + " km");
+            log.debug("Hospital within 100 km: " + hd.hospital.getName() + " at distance: " + hd.distance + " km");
         }
 
         return sortedHospitals;
