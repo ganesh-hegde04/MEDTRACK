@@ -8,7 +8,7 @@ import java.util.UUID;
 public class Animal {
 
     @Id
-    @Column(name = "id", columnDefinition = "BINARY(16)")
+    @Column(name = "id", columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "name", nullable = false, unique = true)
@@ -17,29 +17,24 @@ public class Animal {
     @Column(name = "photo_url")
     private String photoUrl;
 
-    // Default constructor generates UUID
-    public Animal() {
-        this.id = UUID.randomUUID();
+    // JPA requires no-args constructor
+    protected Animal() {
     }
 
-    // Constructor with name
     public Animal(String name) {
-        this.id = UUID.randomUUID();
         this.name = name;
     }
 
-    // Constructor with name and photoUrl
     public Animal(String name, String photoUrl) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.photoUrl = photoUrl;
     }
 
-    // Constructor with all fields
-    public Animal(UUID id, String name, String photoUrl) {
-        this.id = id;
-        this.name = name;
-        this.photoUrl = photoUrl;
+    @PrePersist
+    private void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
     }
 
     // Getters and setters

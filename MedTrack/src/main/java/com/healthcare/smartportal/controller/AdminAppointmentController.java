@@ -24,4 +24,10 @@ public class AdminAppointmentController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return appointmentService.getAppointmentsByDepartmentAndDate(hospitalId, department, date);
     }
+
+    @PutMapping("/mark-checked/{appointmentId}")
+public void markChecked(@PathVariable String appointmentId) {
+    appointmentService.markAsChecked(appointmentId);
+}
+
 }

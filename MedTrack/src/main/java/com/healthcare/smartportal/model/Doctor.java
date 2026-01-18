@@ -8,8 +8,7 @@ import java.util.UUID;
 public class Doctor {
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     @Column(nullable = false)
@@ -22,11 +21,22 @@ public class Doctor {
     private int experience;
 
     @Column(nullable = false)
-    private String specialization; 
+    private String specialization;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
+
+    // REQUIRED by JPA and service code
+    public Doctor() {
+    }
+
+    @PrePersist
+    private void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+    }
 
     // Getters and Setters
     public UUID getId() { return id; }

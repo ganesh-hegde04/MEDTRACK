@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 const HospitalRegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -7,8 +9,9 @@ const HospitalRegistrationForm = () => {
     contact: '',
     latitude: '',
     longitude: '',
+    email: '',
     username: '',
-  password: ''
+    adminPassword: ''
   });
 
   const [message, setMessage] = useState({ type: '', content: '' });
@@ -30,10 +33,16 @@ const HospitalRegistrationForm = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/admin/register', {
+      const dataToSend = {
+        ...formData,
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude)
+      };
+
+      const response = await fetch(`${BACKEND_URL}/api/admin/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (response.ok) {
@@ -44,8 +53,9 @@ const HospitalRegistrationForm = () => {
           contact: '',
           latitude: '',
           longitude: '',
+          email: '',
           username: '',
-        password: ''
+          adminPassword: ''
         });
       } else {
         const err = await response.json();
@@ -71,31 +81,135 @@ const HospitalRegistrationForm = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {[
-          { label: 'Hospital Name', name: 'name', type: 'text' },
-          { label: 'Location', name: 'location', type: 'text' },
-          { label: 'Contact Number', name: 'contact', type: 'tel' },
-          { label: 'Latitude', name: 'latitude', type: 'text' },
-          { label: 'Longitude', name: 'longitude', type: 'text' },
-          { label: 'Admin Username', name: 'username', type: 'text' },
-          { label: 'Admin Password', name: 'adminPassword', type: 'password' }
-        ].map(({ label, name, type }) => (
-          <div key={name}>
-            <label htmlFor={name} className="block font-medium text-gray-700 mb-1">
-              {label}
-            </label>
-            <input
-              id={name}
-              name={name}
-              type={type}
-              value={formData[name]}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-        ))}
+        {/* Hospital Name */}
+        <div>
+          <label htmlFor="name" className="block font-medium text-gray-700 mb-1">
+            Hospital Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
 
+        {/* Location */}
+        <div>
+          <label htmlFor="location" className="block font-medium text-gray-700 mb-1">
+            Location
+          </label>
+          <input
+            id="location"
+            name="location"
+            type="text"
+            value={formData.location}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Contact Number */}
+        <div>
+          <label htmlFor="contact" className="block font-medium text-gray-700 mb-1">
+            Contact Number
+          </label>
+          <input
+            id="contact"
+            name="contact"
+            type="tel"
+            value={formData.contact}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Latitude */}
+        <div>
+          <label htmlFor="latitude" className="block font-medium text-gray-700 mb-1">
+            Latitude
+          </label>
+          <input
+            id="latitude"
+            name="latitude"
+            type="text"
+            value={formData.latitude}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Longitude */}
+        <div>
+          <label htmlFor="longitude" className="block font-medium text-gray-700 mb-1">
+            Longitude
+          </label>
+          <input
+            id="longitude"
+            name="longitude"
+            type="text"
+            value={formData.longitude}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Admin Email */}
+        <div>
+          <label htmlFor="email" className="block font-medium text-gray-700 mb-1">
+            Admin Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Admin Username */}
+        <div>
+          <label htmlFor="username" className="block font-medium text-gray-700 mb-1">
+            Admin Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Admin Password */}
+        <div>
+          <label htmlFor="adminPassword" className="block font-medium text-gray-700 mb-1">
+            Admin Password
+          </label>
+          <input
+            id="adminPassword"
+            name="adminPassword"
+            type="password"
+            value={formData.adminPassword}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"

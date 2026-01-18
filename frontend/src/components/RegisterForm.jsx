@@ -22,7 +22,7 @@ export default function RegisterForm() {
     const allFilled = Object.values(formData).every((field) => field.trim() !== "");
     if (!allFilled) return false;
 
-    // Check latitude and longitude are valid numbers
+    // Check latitude and longitude
     const lat = parseFloat(formData.latitude);
     const long = parseFloat(formData.longitude);
     if (isNaN(lat) || isNaN(long)) return false;
@@ -45,7 +45,7 @@ export default function RegisterForm() {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/admin/register", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

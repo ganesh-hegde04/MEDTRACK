@@ -19,9 +19,9 @@ public class EncryptionService {
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int IV_LENGTH = 16;
-    private static final int KEY_LENGTH = 32; // 256-bit AES
+    private static final int KEY_LENGTH = 32; 
 
-    // Replace with a securely stored key (e.g., from env var or vault)
+   
     @Value("${encryption.secret-key}")
     private  String rawSecret ;
 
@@ -43,7 +43,7 @@ public class EncryptionService {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
         byte[] encrypted = cipher.doFinal(plainData);
 
-        // Combine IV + encrypted data
+       
         byte[] result = new byte[IV_LENGTH + encrypted.length];
         System.arraycopy(iv, 0, result, 0, IV_LENGTH);
         System.arraycopy(encrypted, 0, result, IV_LENGTH, encrypted.length);

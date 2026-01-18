@@ -4,13 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Column;
+
+
 import java.util.UUID;
 
 @Entity
 public class AntivenomInventory {
 
     @Id
-    @GeneratedValue
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(optional = false)
@@ -21,14 +25,21 @@ public class AntivenomInventory {
 
     private int quantity;
 
-    // Default constructor
-    public AntivenomInventory() {}
+    public AntivenomInventory() {
+        // required by JPA
+    }
 
-    // Constructor with fields
     public AntivenomInventory(Hospital hospital, Animal animal, int quantity) {
         this.hospital = hospital;
         this.animal = animal;
         this.quantity = quantity;
+    }
+
+    @PrePersist
+    private void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
     }
 
     // Getters and Setters

@@ -2,6 +2,7 @@ package com.healthcare.smartportal.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,22 +13,21 @@ import java.util.UUID;
 public class Appointment {
 
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "BINARY(16)")
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     @Column(unique = true, nullable = false)
     private String appointmentId;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
 
@@ -44,10 +44,27 @@ public class Appointment {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
     @Column(name = "reminder_sent", nullable = false)
     private boolean reminderSent = false;
 
-    // Transient helper method
+    @Column(nullable = false)
+    private boolean checked = false;
+
+    // REQUIRED by JPA and service code
+    public Appointment() {
+    }
+
+    @PrePersist
+    private void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+    }
+
+    // Transient helper
     @Transient
     public LocalDateTime getAppointmentDateTime() {
         return LocalDateTime.of(this.appointmentDate, this.appointmentTime);
@@ -127,11 +144,27 @@ public class Appointment {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getUpdatedAt() {  
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {  
+        this.updatedAt = updatedAt;
+    }
+
     public boolean isReminderSent() {
         return reminderSent;
     }
 
     public void setReminderSent(boolean reminderSent) {
         this.reminderSent = reminderSent;
+    }
+    
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 }

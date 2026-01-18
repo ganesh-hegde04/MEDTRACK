@@ -14,7 +14,7 @@ export default function AntivenomPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/antivenom/animals");
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/antivenom/animals`);
         setAnimals(res.data);
       } catch (err) {
         console.error("Error fetching animals:", err);
@@ -138,7 +138,7 @@ export default function AntivenomPage() {
               setLoading(true);
               setError(null);
               axios
-                .get("http://localhost:8080/api/antivenom/animals")
+                .get(`${import.meta.env.VITE_BACKEND_URL}/api/antivenom/animals`)
                 .then((res) => {
                   setAnimals(res.data);
                   setLoading(false);

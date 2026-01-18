@@ -57,7 +57,7 @@ export default function BloodBankPage() {
 
     axios
       .get(
-        `http://localhost:8080/api/bloodbanks/hospitals?group=${encodeURIComponent(
+        `${import.meta.env.VITE_BACKEND_URL}/api/bloodbanks/hospitals?group=${encodeURIComponent(
           group
         )}&lat=${userLocation.lat}&lon=${userLocation.lon}`
       )

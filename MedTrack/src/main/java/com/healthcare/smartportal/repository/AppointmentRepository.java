@@ -3,6 +3,7 @@ package com.healthcare.smartportal.repository;
 import com.healthcare.smartportal.dto.AppointmentSummaryDto;
 import com.healthcare.smartportal.model.Appointment;
 import com.healthcare.smartportal.model.Doctor;
+import com.healthcare.smartportal.model.User;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,7 +61,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
         LocalDate appointmentDate,
         LocalTime appointmentTime
     );
-
+    
     Optional<Appointment> findByAppointmentId(String appointmentId);
 
     @Query("""
@@ -77,4 +78,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
         @Param("startTomorrow") LocalTime startTomorrow,
         @Param("endTomorrow") LocalTime endTomorrow
     );
+
+    List<Appointment> findByUser(User user);
+
 }

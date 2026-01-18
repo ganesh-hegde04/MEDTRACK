@@ -8,7 +8,7 @@ export default function HospitalDetail() {
   const [hospital, setHospital] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/hospitals/${hospitalId}`)
+    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/${hospitalId}`)
       .then((res) => setHospital(res.data))
       .catch((err) => console.error(err));
   }, [hospitalId]);

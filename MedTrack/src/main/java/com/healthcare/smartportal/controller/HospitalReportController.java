@@ -31,17 +31,17 @@ public class HospitalReportController {
 
     // 1. Send code to patient's email for hospital upload
     @PostMapping("/send-code")
-    public ResponseEntity<?> sendHospitalUploadCode(@RequestParam String phone) {
-        Optional<User> patient = userRepository.findByPhone(phone);
-        if (patient.isEmpty()) return ResponseEntity.badRequest().body("Invalid phone number.");
+    public ResponseEntity<?> sendHospitalUploadCode(@RequestParam String email) {
+        Optional<User> patient = userRepository.findByEmail(email);
+        if (patient.isEmpty()) return ResponseEntity.badRequest().body("Invalid email address.");
 
         String code = verificationService.generateCode();
 
-        hospitalTokenRepo.deleteById(phone);
-        hospitalTokenRepo.save(new HospitalReportToken(phone, code, LocalDateTime.now()));
+        hospitalTokenRepo.deleteById(email);
+        hospitalTokenRepo.save(new HospitalReportToken(email, code, LocalDateTime.now()));
 
         emailService.sendAppointmentReminder(
-            patient.get().getEmail(),
+            email,
             "Hospital Report Upload Code",
             "Your verification code: " + code
         );
@@ -50,9 +50,9 @@ public class HospitalReportController {
 
     // 2. Verify code before upload
     @PostMapping("/verify-code")
-    public ResponseEntity<?> verifyHospitalCode(@RequestParam String phone,
+    public ResponseEntity<?> verifyHospitalCode(@RequestParam String email,
                                                 @RequestParam String code) {
-        Optional<HospitalReportToken> token = hospitalTokenRepo.findById(phone);
+        Optional<HospitalReportToken> token = hospitalTokenRepo.findById(email);
         if (token.isPresent()
                 && token.get().getCode().equals(code)
                 && token.get().getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(5))) {
@@ -64,17 +64,17 @@ public class HospitalReportController {
     // 3. Upload report after verification
     @PostMapping("/upload")
     public ResponseEntity<?> uploadByHospital(@RequestParam("file") MultipartFile file,
-                                              @RequestParam String phone,
+                                              @RequestParam String email,
                                               @RequestParam String code) {
         try {
-            Optional<HospitalReportToken> token = hospitalTokenRepo.findById(phone);
+            Optional<HospitalReportToken> token = hospitalTokenRepo.findById(email);
             if (token.isEmpty()
                     || !token.get().getCode().equals(code)
                     || token.get().getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(5))) {
                 return ResponseEntity.badRequest().body("Invalid or expired code");
             }
 
-            Optional<User> patient = userRepository.findByPhone(phone);
+            Optional<User> patient = userRepository.findByEmail(email);
             if (patient.isEmpty()) return ResponseEntity.badRequest().body("Invalid patient.");
 
             byte[] encrypted = encryptionService.encrypt(file.getBytes());
@@ -82,13 +82,13 @@ public class HospitalReportController {
             MedicalReport report = new MedicalReport();
             report.setFileName(file.getOriginalFilename());
             report.setFileType(file.getContentType());
-            report.setPatientEmail(patient.get().getEmail());
+            report.setPatientEmail(email);
             report.setEncryptedData(encrypted);
             report.setUploadedAt(LocalDateTime.now());
 
             reportRepository.save(report);
 
-            hospitalTokenRepo.deleteById(phone);
+            hospitalTokenRepo.deleteById(email);
 
             return ResponseEntity.ok("Report uploaded securely.");
         } catch (Exception e) {

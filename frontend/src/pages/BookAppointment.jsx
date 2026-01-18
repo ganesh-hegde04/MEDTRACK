@@ -25,7 +25,7 @@ export default function BookAppointment() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (hospitalQuery.length > 1) {
-        fetch(`/api/appointments/search-hospitals?search=${hospitalQuery}`)
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments/search-hospitals?search=${hospitalQuery}`)
           .then(res => {
             if (!res.ok) throw new Error("Server error");
             return res.json();
@@ -56,7 +56,7 @@ export default function BookAppointment() {
   useEffect(() => {
     if (formData.hospitalName && formData.department) {
       fetch(
-        `/api/appointments/by-department?hospitalName=${encodeURIComponent(
+        `${import.meta.env.VITE_BACKEND_URL}/api/appointments/by-department?hospitalName=${encodeURIComponent(
           formData.hospitalName
         )}&department=${encodeURIComponent(formData.department)}`
       )
@@ -85,7 +85,7 @@ export default function BookAppointment() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/appointments/book", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

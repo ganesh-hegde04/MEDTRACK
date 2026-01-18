@@ -8,7 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bloodbanks")
-@CrossOrigin(origins = "*")
 public class BloodBankController {
 
     private final BloodBankService bloodBankService;

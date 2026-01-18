@@ -1,5 +1,6 @@
 package com.healthcare.smartportal.service;
 
+import com.healthcare.smartportal.dto.AppointmentResponse;
 import com.healthcare.smartportal.exception.DoctorNotFoundException;
 import com.healthcare.smartportal.exception.SlotAlreadyBookedException;
 import com.healthcare.smartportal.model.*;
@@ -11,8 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -164,4 +169,56 @@ public class AppointmentService {
             emailService.sendAppointmentReminder(email, subject, body);
         }
     }
+
+    public Map<String, Object> getAppointmentsAndNotificationsForUser(String phone) {
+    User user = userRepo.findByPhone(phone)
+            .orElseThrow(() -> new RuntimeException("User not found with phone: " + phone));
+
+    List<Appointment> allAppointments = appointmentRepo.findByUser(user);
+    
+    // Filter out CANCELLED appointments and only get upcoming ones
+    List<AppointmentResponse> responses = allAppointments.stream()
+            .filter(app -> app.getStatus() != AppointmentStatus.CANCELLED) // Add this filter
+            .filter(app -> {
+                // Check if appointment is upcoming (date/time in future)
+                LocalDateTime appointmentDateTime = LocalDateTime.of(
+                    app.getAppointmentDate(), 
+                    app.getAppointmentTime()
+                );
+                return appointmentDateTime.isAfter(LocalDateTime.now());
+            })
+            .map(appointment -> new AppointmentResponse(
+                appointment.getAppointmentId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                appointment.getStatus(),
+                appointment.getDoctor().getName(),
+                appointment.getHospital().getName()
+            ))
+            .toList();
+
+    // Generate notifications for cancelled appointments
+    List<String> notifications = allAppointments.stream()
+            .filter(a -> a.getStatus() == AppointmentStatus.CANCELLED)
+            .filter(a -> {
+                // Only show recent cancellations (last 7 days)
+                LocalDateTime cancelTime = a.getUpdatedAt() != null ? 
+                    a.getUpdatedAt() : LocalDateTime.now();
+                return cancelTime.isAfter(LocalDateTime.now().minusDays(7));
+            })
+            .map(a -> {
+                String doc = a.getDoctor().getName();
+                String hosp = a.getHospital().getName();
+                String time = a.getAppointmentDate() + " at " + a.getAppointmentTime();
+                return String.format("Appointment with %s at %s on %s was cancelled.", doc, hosp, time);
+            })
+            .toList();
+
+    Map<String, Object> result = new HashMap<>();
+    result.put("appointments", responses);
+    result.put("notifications", notifications);
+
+    return result;
+}
+
 }

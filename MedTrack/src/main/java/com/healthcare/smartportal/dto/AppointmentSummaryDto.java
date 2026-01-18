@@ -12,6 +12,7 @@ public class AppointmentSummaryDto {
     private String department;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
+    private boolean checked; 
 
     public AppointmentSummaryDto(String appointmentId, String patientName, String contactNumber,
                                   String doctorName, String department,
@@ -25,7 +26,7 @@ public class AppointmentSummaryDto {
         this.appointmentTime = appointmentTime;
     }
 
-    // Getters and Setters
+    // ✅ Existing Getters
 
     public String getAppointmentId() {
         return appointmentId;
@@ -53,5 +54,13 @@ public class AppointmentSummaryDto {
 
     public LocalTime getAppointmentTime() {
         return appointmentTime;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 }

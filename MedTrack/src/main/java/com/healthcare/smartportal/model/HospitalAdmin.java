@@ -1,7 +1,11 @@
 package com.healthcare.smartportal.model;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 
 import java.util.UUID;
 
@@ -9,16 +13,11 @@ import java.util.UUID;
 public class HospitalAdmin {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "id", columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "hospital_id", nullable = false, columnDefinition = "BINARY(16)")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
 
     @Column(nullable = false, unique = true)
@@ -30,7 +29,9 @@ public class HospitalAdmin {
     @Column(nullable = false, unique = true)
     private String email;
 
-    public HospitalAdmin() {}
+    // ✅ Required by JPA and service code
+    public HospitalAdmin() {
+    }
 
     public HospitalAdmin(Hospital hospital, String username, String password, String email) {
         this.hospital = hospital;
@@ -39,6 +40,15 @@ public class HospitalAdmin {
         this.email = email;
     }
 
+    // ✅ UUID generation in Java 
+    @PrePersist
+    private void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+    }
+
+    // Getters & Setters
     public UUID getId() {
         return id;
     }
@@ -66,15 +76,15 @@ public class HospitalAdmin {
     public String getPassword() {
         return password;
     }
-
+ 
     public void setPassword(String password) {
         this.password = password;
     }
-
+ 
     public String getEmail() {
         return email;
     }
-
+ 
     public void setEmail(String email) {
         this.email = email;
     }

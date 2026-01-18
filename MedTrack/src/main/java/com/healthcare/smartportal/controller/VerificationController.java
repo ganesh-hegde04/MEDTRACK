@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/verify")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // allow your frontend
 public class VerificationController {
 
     private final VerificationService verificationService;

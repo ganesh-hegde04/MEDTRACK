@@ -31,6 +31,11 @@ public class HospitalAdminService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // ✅ ADD THIS (REQUIRED)
+    @Autowired
+    private TokenService tokenService;
+
+    // ================= EXISTINGD (UNCHANGED) =================
     public HospitalAdmin register(String username, String password, UUID hospitalId) {
         Optional<Hospital> hospitalOpt = hospitalRepo.findById(hospitalId);
         if (hospitalOpt.isEmpty()) {
@@ -45,6 +50,7 @@ public class HospitalAdminService {
         return adminRepo.save(admin);
     }
 
+    // ================= EXISTING LOGIN (UNCHANGED) =================
     public Optional<HospitalAdmin> login(String username, String password) {
         Optional<HospitalAdmin> adminOpt = adminRepo.findByUsername(username);
         if (adminOpt.isPresent()) {
@@ -56,13 +62,28 @@ public class HospitalAdminService {
         return Optional.empty();
     }
 
+    // ================= ✅ NEW LOGIN (JWT) =================
+    public String loginAndGenerateToken(String username, String password) {
+
+        HospitalAdmin admin = adminRepo.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(password, admin.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        // ✅ generate JWT
+        return tokenService.generateToken(
+            admin.getUsername(),
+            admin.getEmail()
+        );
+    }
+
+    // ================= UNCHANGED =================
     public Optional<HospitalAdmin> getAdminByUsername(String username) {
         return adminRepo.findByUsername(username);
     }
 
-    /**
-     * Updates antivenom inventory by hospital ID and animal name.
-     */
     public boolean updateAntivenom(UUID hospitalId, String animalName, int quantity) {
         Optional<Hospital> hospitalOpt = hospitalRepo.findById(hospitalId);
         if (hospitalOpt.isEmpty()) return false;
@@ -87,9 +108,6 @@ public class HospitalAdminService {
         return true;
     }
 
-    /**
-     * Updates blood inventory by hospital ID and blood group.
-     */
     public boolean updateBlood(UUID hospitalId, String bloodGroup, int quantity) {
         Optional<Hospital> hospitalOpt = hospitalRepo.findById(hospitalId);
         if (hospitalOpt.isEmpty()) return false;
@@ -110,9 +128,6 @@ public class HospitalAdminService {
         return true;
     }
 
-    /**
-     * Registers both hospital and admin in a single transaction.
-     */
     public Hospital registerHospitalAndAdmin(HospitalRegistrationRequest request) {
         if (hospitalRepo.existsByLocation(request.getLocation())) {
             throw new IllegalArgumentException("Location already registered");
@@ -122,11 +137,12 @@ public class HospitalAdminService {
             throw new IllegalArgumentException("Contact already used");
         }
 
-        if (hospitalRepo.existsByLatitudeAndLongitude(request.getLatitude(), request.getLongitude())) {
+        if (hospitalRepo.existsByLatitudeAndLongitude(
+                request.getLatitude(), request.getLongitude())) {
             throw new IllegalArgumentException("Hospital at this location already exists");
         }
 
-        if (adminRepo.existsByUsername(request.getusername())) {
+        if (adminRepo.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
 
@@ -136,12 +152,14 @@ public class HospitalAdminService {
         hospital.setContact(request.getContact());
         hospital.setLatitude(request.getLatitude());
         hospital.setLongitude(request.getLongitude());
+        hospital.setEmail(request.getEmail());
 
         Hospital savedHospital = hospitalRepo.save(hospital);
 
         HospitalAdmin admin = new HospitalAdmin();
-        admin.setUsername(request.getusername());
+        admin.setUsername(request.getUsername());
         admin.setPassword(passwordEncoder.encode(request.getAdminPassword()));
+        admin.setEmail(request.getEmail());
         admin.setHospital(savedHospital);
 
         adminRepo.save(admin);

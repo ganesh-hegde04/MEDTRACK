@@ -67,7 +67,7 @@ public class AppointmentController {
         }
     }
 
-    // ✅ Cancel
+    // ✅ Cancel by user
     @PatchMapping("/cancel/{appointmentId}")
     public ResponseEntity<?> cancelAppointment(@PathVariable String appointmentId) {
         try {
@@ -129,4 +129,10 @@ public class AppointmentController {
         List<String> doctorNames = doctorRepo.findDoctorNamesByDepartmentAndHospital(department, hospital);
         return ResponseEntity.ok(doctorNames);
     }
+
+    // ✅ Get Appointments + Notifications for a User
+@GetMapping("/user/{phone}")
+public ResponseEntity<?> getAppointmentsByUserPhone(@PathVariable String phone) {
+    return ResponseEntity.ok(appointmentService.getAppointmentsAndNotificationsForUser(phone));
+}
 }

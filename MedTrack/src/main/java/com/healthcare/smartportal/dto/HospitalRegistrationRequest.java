@@ -2,9 +2,6 @@ package com.healthcare.smartportal.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * DTO for Hospital registration along with admin details.
- */
 public class HospitalRegistrationRequest {
 
     private String name;
@@ -12,6 +9,7 @@ public class HospitalRegistrationRequest {
     private String contact;
     private double latitude;
     private double longitude;
+    private String email;
 
     @JsonProperty("username")
     private String username;
@@ -19,78 +17,50 @@ public class HospitalRegistrationRequest {
     @JsonProperty("adminPassword")
     private String adminPassword;
 
-    public HospitalRegistrationRequest() {
-    }
+    public HospitalRegistrationRequest() {}
 
     public HospitalRegistrationRequest(String name, String location, String contact,
                                        double latitude, double longitude,
+                                       String email,
                                        String username, String adminPassword) {
         this.name = name;
         this.location = location;
         this.contact = contact;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.email = email;
         this.username = username;
         this.adminPassword = adminPassword;
     }
 
-    // Getters and Setters
+    // Getters and Setters for all fields
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public String getLocation() {
-        return location;
-    }
+    public String getContact() { return contact; }
+    public void setContact(String contact) { this.contact = contact; }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public String getContact() {
-        return contact;
-    }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public double getLatitude() {
-        return latitude;
-    }
+   public String getUsername() { return username;}
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
+public void setUsername(String username) {this.username = username;}
 
-    public double getLongitude() {
-        return longitude;
-    }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
+    public String getAdminPassword() { return adminPassword; }
+    public void setAdminPassword(String adminPassword) { this.adminPassword = adminPassword; }
 
-    public String getusername() {
-        return username;
-    }
-
-    public void setusername(String username) {
-        this.username = username;
-    }
-
-    public String getAdminPassword() {
-        return adminPassword;
-    }
-
-    public void setAdminPassword(String adminPassword) {
-        this.adminPassword = adminPassword;
-    }
 
     @Override
     public String toString() {
@@ -100,6 +70,7 @@ public class HospitalRegistrationRequest {
                 ", contact='" + contact + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
+                ", email='" + email + '\'' + // ✅ Add toString
                 ", username='" + username + '\'' +
                 '}';
     }

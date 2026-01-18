@@ -14,8 +14,9 @@ export default function HospitalAdminPage() {
     contact: "",
     latitude: "",
     longitude: "",
+    email: "",        // Added email
     username: "",
-  password: "",
+    password: "",
   });
 
   // Login
@@ -31,9 +32,18 @@ export default function HospitalAdminPage() {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post("http://localhost:8080/api/admin/register", regData);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/admin/register`, regData);
       setMessage(res.data);
-      setRegData({});
+      setRegData({
+        name: "",
+        location: "",
+        contact: "",
+        latitude: "",
+        longitude: "",
+        email: "",
+        username: "",
+        password: "",
+      });
     } catch (error) {
       setMessage(error.response?.data || "Registration failed");
     }
@@ -41,7 +51,7 @@ export default function HospitalAdminPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:8080/api/admin/login", null, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/admin/login`, null, {
         params: loginData,
       });
       setMessage(res.data);
@@ -52,7 +62,7 @@ export default function HospitalAdminPage() {
 
   const updateAntivenom = async () => {
     try {
-      const res = await axios.post("http://localhost:8080/api/admin/antivenom/update", null, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/admin/antivenom/update`, null, {
         params: {
           hospitalId,
           animalName: antivenom.animalName,
@@ -67,7 +77,7 @@ export default function HospitalAdminPage() {
 
   const updateBlood = async () => {
     try {
-      const res = await axios.post("http://localhost:8080/api/admin/blood/update", null, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/admin/blood/update`, null, {
         params: {
           hospitalId,
           bloodGroup: blood.bloodGroup,
@@ -102,7 +112,9 @@ export default function HospitalAdminPage() {
       </div>
 
       {message && (
-        <div className="text-center text-sm font-medium bg-white p-4 rounded shadow mb-6">{message}</div>
+        <div className="text-center text-sm font-medium bg-white p-4 rounded shadow mb-6">
+          {message}
+        </div>
       )}
 
       {/* Register */}
@@ -114,12 +126,19 @@ export default function HospitalAdminPage() {
             ["contact", "Contact"],
             ["latitude", "Latitude"],
             ["longitude", "Longitude"],
+            ["email", "Admin Email"],
             ["username", "Admin Username"],
-            ["adminPassword", "Admin Password"],
+            ["password", "Admin Password"],
           ].map(([field, label]) => (
             <input
               key={field}
-              type={field.toLowerCase().includes("password") ? "password" : "text"}
+              type={
+                field.toLowerCase().includes("password")
+                  ? "password"
+                  : field === "email"
+                  ? "email"
+                  : "text"
+              }
               placeholder={label}
               value={regData[field] || ""}
               onChange={(e) => setRegData({ ...regData, [field]: e.target.value })}
